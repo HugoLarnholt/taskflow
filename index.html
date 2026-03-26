@@ -387,6 +387,54 @@ body {
   </div>
 </div>
 
+<!-- EDIT TASK MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Task</div>
+    <div class="form-group">
+      <label class="form-label">Task name</label>
+      <input class="form-input" id="edit-task-name" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Time (optional)</label>
+      <input class="form-input" id="edit-task-time" type="time">
+    </div>
+    <div class="form-group">
+      <label class="form-label">How often?</label>
+      <div class="freq-grid" id="edit-freq-grid">
+        <button class="freq-btn" onclick="selectEditFreq('daily', this)">Daily</button>
+        <button class="freq-btn" onclick="selectEditFreq('weekly', this)">Weekly</button>
+        <button class="freq-btn" onclick="selectEditFreq('monthly', this)">Monthly</button>
+        <button class="freq-btn" onclick="selectEditFreq('once', this)">Once</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="edit-task-category">
+        <option value="health">🏃 Health & Fitness</option>
+        <option value="work">💼 Work & Study</option>
+        <option value="admin">📋 Admin</option>
+        <option value="personal">⭐ Personal</option>
+        <option value="finance">💰 Finance</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Reminder notification</label>
+      <select class="form-select" id="edit-task-reminder">
+        <option value="">No reminder</option>
+        <option value="ontime">At task time</option>
+        <option value="15min">15 min before</option>
+        <option value="30min">30 min before</option>
+        <option value="1hr">1 hour before</option>
+        <option value="morning">Every morning 8 AM</option>
+      </select>
+    </div>
+    <button class="submit-btn" onclick="saveEdit()">Save Changes ✓</button>
+    <button style="width:100%;padding:12px;background:none;border:none;color:var(--mid);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;margin-top:8px;" onclick="closeEditModal()">Cancel</button>
+  </div>
+</div>
+
 <script>
 // ── DATA ──
 let tasks = JSON.parse(localStorage.getItem('taskflow_tasks') || '[]');
@@ -576,8 +624,8 @@ function taskCardHTML(task, isDone) {
   const schedStr = schedLabel ? `<span class="task-time">📅 ${schedLabel}</span>` : '';
   const timeStr = task.time ? `<span class="task-time"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${task.time}</span>` : '';
   const dot = task.reminder ? '<span class="task-reminder-dot"></span>' : '';
-  return `<div class="task-card ${isDone ? 'done' : ''}" onclick="toggleTask(${task.id})">
-    <div class="task-check ${isDone ? 'checked' : ''}">
+  return `<div class="task-card ${isDone ? 'done' : ''}">
+    <div class="task-check ${isDone ? 'checked' : ''}" onclick="toggleTask(${task.id})">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <div class="task-info">
@@ -587,7 +635,10 @@ function taskCardHTML(task, isDone) {
         ${schedStr}${timeStr}${dot}
       </div>
     </div>
-    <button class="task-menu-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">
+    <button class="task-menu-btn" onclick="openEditModal(${task.id})" title="Edit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </button>
+    <button class="task-menu-btn" onclick="deleteTask(${task.id})" title="Delete">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
     </button>
   </div>`;
@@ -684,6 +735,54 @@ function selectFreq(freq, btn) {
   document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
 }
+
+// ── EDIT MODAL ──
+let editingTaskId = null;
+let selectedEditFreq = 'daily';
+
+function openEditModal(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  editingTaskId = id;
+  selectedEditFreq = task.freq;
+  document.getElementById('edit-task-name').value = task.name;
+  document.getElementById('edit-task-time').value = task.time || '';
+  document.getElementById('edit-task-category').value = task.category || 'personal';
+  document.getElementById('edit-task-reminder').value = task.reminder || '';
+  document.querySelectorAll('#edit-freq-grid .freq-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent.toLowerCase() === task.freq);
+  });
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editingTaskId = null;
+}
+function selectEditFreq(freq, btn) {
+  selectedEditFreq = freq;
+  document.querySelectorAll('#edit-freq-grid .freq-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+function saveEdit() {
+  const task = tasks.find(t => t.id === editingTaskId);
+  if (!task) return;
+  const name = document.getElementById('edit-task-name').value.trim();
+  if (!name) { showToast('Please enter a task name'); return; }
+  task.name = name;
+  task.time = document.getElementById('edit-task-time').value;
+  task.freq = selectedEditFreq;
+  task.category = document.getElementById('edit-task-category').value;
+  task.reminder = document.getElementById('edit-task-reminder').value;
+  save();
+  closeEditModal();
+  renderToday();
+  renderAllTasks();
+  renderStats();
+  showToast('Task updated! ✓');
+}
+document.getElementById('edit-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('edit-modal')) closeEditModal();
+});
 
 function addTask() {
   const name = document.getElementById('task-name').value.trim();
