@@ -211,6 +211,25 @@ body {
 /* Reminder bell */
 .bell-active { color: var(--gold) !important; }
 
+/* Upcoming card */
+.upcoming-card {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.upcoming-day-badge {
+  min-width: 44px; height: 44px; border-radius: 12px;
+  background: var(--gold-pale); display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.upcoming-day-num { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--gold); line-height: 1; }
+.upcoming-day-label { font-size: 9px; color: var(--gold-light); font-weight: 600; letter-spacing: 0.04em; }
+.upcoming-task-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.upcoming-task-sub { font-size: 11px; color: var(--light); margin-top: 2px; }
+
 .task-reminder-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--gold); margin-left: 2px; flex-shrink: 0;
@@ -251,6 +270,10 @@ body {
   <div class="section" id="done-section" style="display:none">
     <div class="section-title">Completed</div>
     <div id="done-list"></div>
+  </div>
+  <div class="section" id="upcoming-section">
+    <div class="section-title">Coming Up</div>
+    <div id="upcoming-list"></div>
   </div>
 </div>
 
@@ -402,36 +425,39 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add default tasks if empty
   if (tasks.length === 0) {
     tasks = [
-      { id: 6, name: 'Clean fan', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 7, name: 'Clean my car', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 9, name: 'Clean TV', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 11, name: 'Clean the mirrors', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 12, name: 'Clean the dining table', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 13, name: 'Water the plants', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 14, name: 'Dust off the furniture', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 15, name: 'Wiping out the dust', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 16, name: 'Change the sheets', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 17, name: 'Clean shower & toilet', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 19, name: 'Changing towel', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
+      // Daily
       { id: 20, name: 'Make Beds', time: '', freq: 'daily', category: 'personal', reminder: 'morning' },
       { id: 23, name: 'Wash Dishes', time: '', freq: 'daily', category: 'personal', reminder: 'morning' },
       { id: 24, name: 'Sweep / Vacuum floors', time: '', freq: 'daily', category: 'personal', reminder: 'morning' },
       { id: 25, name: 'Take the trash out', time: '', freq: 'daily', category: 'personal', reminder: 'morning' },
-      { id: 27, name: 'Mop Floors', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 28, name: 'Clean Pet Supplies', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 29, name: 'Clean Vehicle', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 31, name: 'Laundry', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 32, name: 'Clean Sinks and Drains', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 33, name: 'Clean Dishwasher', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 34, name: 'Organize Pantry', time: '', freq: 'weekly', category: 'personal', reminder: 'morning' },
-      { id: 35, name: 'Clean Windows and Curtains', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 36, name: 'Clean Baseboards and Doors', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 37, name: 'Clean Air Filters', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 38, name: 'Organize Closets', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 39, name: 'Tidy Up Yard', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 40, name: 'Clean Inside Refrigerator and Microwave', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 41, name: 'Deep Clean Furniture', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
-      { id: 42, name: 'Tidy Up Garage', time: '', freq: 'monthly', category: 'personal', reminder: 'morning' },
+      // Weekly — weekDay: 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+      { id: 31, name: 'Laundry', time: '', freq: 'weekly', weekDay: 1, category: 'personal', reminder: 'morning' },
+      { id: 19, name: 'Changing towel', time: '', freq: 'weekly', weekDay: 2, category: 'personal', reminder: 'morning' },
+      { id: 32, name: 'Clean Sinks and Drains', time: '', freq: 'weekly', weekDay: 2, category: 'personal', reminder: 'morning' },
+      { id: 11, name: 'Clean the mirrors', time: '', freq: 'weekly', weekDay: 3, category: 'personal', reminder: 'morning' },
+      { id: 12, name: 'Clean the dining table', time: '', freq: 'weekly', weekDay: 3, category: 'personal', reminder: 'morning' },
+      { id: 33, name: 'Clean Dishwasher', time: '', freq: 'weekly', weekDay: 3, category: 'personal', reminder: 'morning' },
+      { id: 13, name: 'Water the plants', time: '', freq: 'weekly', weekDay: 4, category: 'personal', reminder: 'morning' },
+      { id: 14, name: 'Dust off the furniture', time: '', freq: 'weekly', weekDay: 4, category: 'personal', reminder: 'morning' },
+      { id: 34, name: 'Organize Pantry', time: '', freq: 'weekly', weekDay: 4, category: 'personal', reminder: 'morning' },
+      { id: 15, name: 'Wiping out the dust', time: '', freq: 'weekly', weekDay: 5, category: 'personal', reminder: 'morning' },
+      { id: 27, name: 'Mop Floors', time: '', freq: 'weekly', weekDay: 6, category: 'personal', reminder: 'morning' },
+      { id: 28, name: 'Clean Pet Supplies', time: '', freq: 'weekly', weekDay: 6, category: 'personal', reminder: 'morning' },
+      { id: 16, name: 'Change the sheets', time: '', freq: 'weekly', weekDay: 0, category: 'personal', reminder: 'morning' },
+      { id: 17, name: 'Clean shower & toilet', time: '', freq: 'weekly', weekDay: 0, category: 'personal', reminder: 'morning' },
+      { id: 29, name: 'Clean Vehicle', time: '', freq: 'weekly', weekDay: 0, category: 'personal', reminder: 'morning' },
+      // Monthly — monthDay: day of month
+      { id: 35, name: 'Clean Windows and Curtains', time: '', freq: 'monthly', monthDay: 5, category: 'personal', reminder: 'morning' },
+      { id: 6, name: 'Clean fan', time: '', freq: 'monthly', monthDay: 7, category: 'personal', reminder: 'morning' },
+      { id: 7, name: 'Clean my car', time: '', freq: 'monthly', monthDay: 10, category: 'personal', reminder: 'morning' },
+      { id: 36, name: 'Clean Baseboards and Doors', time: '', freq: 'monthly', monthDay: 10, category: 'personal', reminder: 'morning' },
+      { id: 40, name: 'Clean Inside Refrigerator and Microwave', time: '', freq: 'monthly', monthDay: 14, category: 'personal', reminder: 'morning' },
+      { id: 37, name: 'Clean Air Filters', time: '', freq: 'monthly', monthDay: 15, category: 'personal', reminder: 'morning' },
+      { id: 9, name: 'Clean TV', time: '', freq: 'monthly', monthDay: 16, category: 'personal', reminder: 'morning' },
+      { id: 38, name: 'Organize Closets', time: '', freq: 'monthly', monthDay: 20, category: 'personal', reminder: 'morning' },
+      { id: 41, name: 'Deep Clean Furniture', time: '', freq: 'monthly', monthDay: 21, category: 'personal', reminder: 'morning' },
+      { id: 39, name: 'Tidy Up Yard', time: '', freq: 'monthly', monthDay: 25, category: 'personal', reminder: 'morning' },
+      { id: 42, name: 'Tidy Up Garage', time: '', freq: 'monthly', monthDay: 28, category: 'personal', reminder: 'morning' },
     ];
     save();
   }
@@ -478,22 +504,76 @@ function renderToday() {
   } else {
     doneSection.style.display = 'none';
   }
+
+  // Upcoming
+  const upcoming = getUpcomingTasks();
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const upcomingSection = document.getElementById('upcoming-section');
+  if (upcoming.length > 0) {
+    upcomingSection.style.display = 'block';
+    document.getElementById('upcoming-list').innerHTML = upcoming.map(({task, daysAway, date}) => {
+      const label = daysAway === 1 ? 'Tomorrow' : dayNames[date.getDay()];
+      const emoji = categoryEmoji[task.category] || '📌';
+      return `<div class="upcoming-card">
+        <div class="upcoming-day-badge">
+          <div class="upcoming-day-num">${date.getDate()}</div>
+          <div class="upcoming-day-label">${label}</div>
+        </div>
+        <div>
+          <div class="upcoming-task-name">${emoji} ${task.name}</div>
+          <div class="upcoming-task-sub">${getScheduleLabel(task)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    upcomingSection.style.display = 'none';
+  }
 }
 
 function isTaskForToday(task) {
+  const d = new Date();
   if (task.freq === 'daily') return true;
   if (task.freq === 'once') return true;
   if (task.freq === 'weekly') {
-    // Show on the day it was created (same day of week)
-    return true; // simplified
+    return task.weekDay !== undefined ? d.getDay() === task.weekDay : true;
   }
-  if (task.freq === 'monthly') return new Date().getDate() === 1 || true; // simplified
+  if (task.freq === 'monthly') {
+    return task.monthDay !== undefined ? d.getDate() === task.monthDay : true;
+  }
   return true;
+}
+
+function getScheduleLabel(task) {
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const ordinal = n => { const s=['th','st','nd','rd']; const v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); };
+  if (task.freq === 'weekly' && task.weekDay !== undefined) return 'Every ' + days[task.weekDay];
+  if (task.freq === 'monthly' && task.monthDay !== undefined) return 'Every ' + ordinal(task.monthDay);
+  if (task.freq === 'daily') return 'Every day';
+  return '';
+}
+
+function getUpcomingTasks() {
+  const upcoming = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    tasks.forEach(task => {
+      if (task.freq === 'weekly' && task.weekDay !== undefined && d.getDay() === task.weekDay) {
+        upcoming.push({ task, daysAway: i, date: d });
+      }
+      if (task.freq === 'monthly' && task.monthDay !== undefined && d.getDate() === task.monthDay) {
+        upcoming.push({ task, daysAway: i, date: d });
+      }
+    });
+  }
+  return upcoming.sort((a,b) => a.daysAway - b.daysAway).slice(0, 6);
 }
 
 function taskCardHTML(task, isDone) {
   const emoji = categoryEmoji[task.category] || '📌';
   const badgeClass = freqColors[task.freq] || 'badge-daily';
+  const schedLabel = getScheduleLabel(task);
+  const schedStr = schedLabel ? `<span class="task-time">📅 ${schedLabel}</span>` : '';
   const timeStr = task.time ? `<span class="task-time"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${task.time}</span>` : '';
   const dot = task.reminder ? '<span class="task-reminder-dot"></span>' : '';
   return `<div class="task-card ${isDone ? 'done' : ''}" onclick="toggleTask(${task.id})">
@@ -504,7 +584,7 @@ function taskCardHTML(task, isDone) {
       <div class="task-name">${emoji} ${task.name}</div>
       <div class="task-meta">
         <span class="task-badge ${badgeClass}">${task.freq}</span>
-        ${timeStr}${dot}
+        ${schedStr}${timeStr}${dot}
       </div>
     </div>
     <button class="task-menu-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">
@@ -637,21 +717,24 @@ function showToast(msg) {
 // ── REMINDERS (browser notifications) ──
 function scheduleReminders() {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const now = new Date();
   tasks.forEach(task => {
-    if (!task.time || !task.reminder) return;
-    const [h, m] = task.time.split(':').map(Number);
-    const now = new Date();
+    if (!isTaskForToday(task)) return;
     const remind = new Date();
-    remind.setHours(h, m, 0, 0);
-    if (task.reminder === '15min') remind.setMinutes(remind.getMinutes() - 15);
-    if (task.reminder === '30min') remind.setMinutes(remind.getMinutes() - 30);
-    if (task.reminder === '1hr') remind.setHours(remind.getHours() - 1);
-    if (task.reminder === 'morning') { remind.setHours(8, 0, 0, 0); }
+    if (task.reminder === 'morning' || !task.time) {
+      remind.setHours(8, 0, 0, 0);
+    } else if (task.time) {
+      const [h, m] = task.time.split(':').map(Number);
+      remind.setHours(h, m, 0, 0);
+      if (task.reminder === '15min') remind.setMinutes(remind.getMinutes() - 15);
+      if (task.reminder === '30min') remind.setMinutes(remind.getMinutes() - 30);
+      if (task.reminder === '1hr') remind.setHours(remind.getHours() - 1);
+    } else return;
     const diff = remind - now;
-    if (diff > 0) {
+    if (diff > 0 && diff < 86400000) {
       setTimeout(() => {
-        new Notification('TaskFlow Reminder 📋', {
-          body: task.name,
+        new Notification('TaskFlow Reminder 🧹', {
+          body: task.name + ' — due today',
           icon: '/favicon.ico'
         });
       }, diff);
