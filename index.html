@@ -361,6 +361,19 @@ body {
         <button class="freq-btn" onclick="selectFreq('once', this)">Once</button>
       </div>
     </div>
+    <div class="form-group" id="add-weekday-group" style="display:none">
+      <label class="form-label">Which day?</label>
+      <select class="form-select" id="task-weekday">
+        <option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option>
+        <option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option>
+      </select>
+    </div>
+    <div class="form-group" id="add-monthday-group" style="display:none">
+      <label class="form-label">Which day of the month?</label>
+      <select class="form-select" id="task-monthday">
+        <option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="5">5th</option><option value="6">6th</option><option value="7">7th</option><option value="8">8th</option><option value="9">9th</option><option value="10">10th</option><option value="11">11th</option><option value="12">12th</option><option value="13">13th</option><option value="14">14th</option><option value="15">15th</option><option value="16">16th</option><option value="17">17th</option><option value="18">18th</option><option value="19">19th</option><option value="20">20th</option><option value="21">21st</option><option value="22">22nd</option><option value="23">23rd</option><option value="24">24th</option><option value="25">25th</option><option value="26">26th</option><option value="27">27th</option><option value="28">28th</option>
+      </select>
+    </div>
     <div class="form-group">
       <label class="form-label">Category</label>
       <select class="form-select" id="task-category">
@@ -408,6 +421,19 @@ body {
         <button class="freq-btn" onclick="selectEditFreq('monthly', this)">Monthly</button>
         <button class="freq-btn" onclick="selectEditFreq('once', this)">Once</button>
       </div>
+    </div>
+    <div class="form-group" id="edit-weekday-group" style="display:none">
+      <label class="form-label">Which day?</label>
+      <select class="form-select" id="edit-task-weekday">
+        <option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option>
+        <option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option>
+      </select>
+    </div>
+    <div class="form-group" id="edit-monthday-group" style="display:none">
+      <label class="form-label">Which day of the month?</label>
+      <select class="form-select" id="edit-task-monthday">
+        <option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="5">5th</option><option value="6">6th</option><option value="7">7th</option><option value="8">8th</option><option value="9">9th</option><option value="10">10th</option><option value="11">11th</option><option value="12">12th</option><option value="13">13th</option><option value="14">14th</option><option value="15">15th</option><option value="16">16th</option><option value="17">17th</option><option value="18">18th</option><option value="19">19th</option><option value="20">20th</option><option value="21">21st</option><option value="22">22nd</option><option value="23">23rd</option><option value="24">24th</option><option value="25">25th</option><option value="26">26th</option><option value="27">27th</option><option value="28">28th</option>
+      </select>
     </div>
     <div class="form-group">
       <label class="form-label">Category</label>
@@ -723,8 +749,10 @@ function closeModal() {
   document.getElementById('task-time').value = '';
   document.getElementById('task-reminder').value = '';
   selectedFreq = 'daily';
-  document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll('.freq-btn')[0].classList.add('selected');
+  document.querySelectorAll('#modal .freq-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('#modal .freq-btn')[0].classList.add('selected');
+  document.getElementById('add-weekday-group').style.display = 'none';
+  document.getElementById('add-monthday-group').style.display = 'none';
 }
 document.getElementById('modal').addEventListener('click', e => {
   if (e.target === document.getElementById('modal')) closeModal();
@@ -732,8 +760,10 @@ document.getElementById('modal').addEventListener('click', e => {
 
 function selectFreq(freq, btn) {
   selectedFreq = freq;
-  document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('#modal .freq-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  document.getElementById('add-weekday-group').style.display = freq === 'weekly' ? 'block' : 'none';
+  document.getElementById('add-monthday-group').style.display = freq === 'monthly' ? 'block' : 'none';
 }
 
 // ── EDIT MODAL ──
@@ -752,6 +782,12 @@ function openEditModal(id) {
   document.querySelectorAll('#edit-freq-grid .freq-btn').forEach(b => {
     b.classList.toggle('selected', b.textContent.toLowerCase() === task.freq);
   });
+  const wdg = document.getElementById('edit-weekday-group');
+  const mdg = document.getElementById('edit-monthday-group');
+  wdg.style.display = task.freq === 'weekly' ? 'block' : 'none';
+  mdg.style.display = task.freq === 'monthly' ? 'block' : 'none';
+  if (task.weekDay !== undefined) document.getElementById('edit-task-weekday').value = task.weekDay;
+  if (task.monthDay !== undefined) document.getElementById('edit-task-monthday').value = task.monthDay;
   document.getElementById('edit-modal').classList.add('open');
 }
 function closeEditModal() {
@@ -762,6 +798,8 @@ function selectEditFreq(freq, btn) {
   selectedEditFreq = freq;
   document.querySelectorAll('#edit-freq-grid .freq-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  document.getElementById('edit-weekday-group').style.display = freq === 'weekly' ? 'block' : 'none';
+  document.getElementById('edit-monthday-group').style.display = freq === 'monthly' ? 'block' : 'none';
 }
 function saveEdit() {
   const task = tasks.find(t => t.id === editingTaskId);
@@ -773,6 +811,16 @@ function saveEdit() {
   task.freq = selectedEditFreq;
   task.category = document.getElementById('edit-task-category').value;
   task.reminder = document.getElementById('edit-task-reminder').value;
+  if (selectedEditFreq === 'weekly') {
+    task.weekDay = parseInt(document.getElementById('edit-task-weekday').value);
+    delete task.monthDay;
+  } else if (selectedEditFreq === 'monthly') {
+    task.monthDay = parseInt(document.getElementById('edit-task-monthday').value);
+    delete task.weekDay;
+  } else {
+    delete task.weekDay;
+    delete task.monthDay;
+  }
   save();
   closeEditModal();
   renderToday();
@@ -795,6 +843,8 @@ function addTask() {
     category: document.getElementById('task-category').value,
     reminder: document.getElementById('task-reminder').value
   };
+  if (selectedFreq === 'weekly') task.weekDay = parseInt(document.getElementById('task-weekday').value);
+  if (selectedFreq === 'monthly') task.monthDay = parseInt(document.getElementById('task-monthday').value);
   tasks.push(task);
   save();
   closeModal();
