@@ -703,7 +703,21 @@ function renderAllTasks() {
     list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>No tasks yet. Add your first one!</p></div>';
     return;
   }
-  list.innerHTML = tasks.map(t => taskCardHTML(t, false)).join('');
+  const groups = [
+    { label: 'Daily', freq: 'daily' },
+    { label: 'Weekly', freq: 'weekly' },
+    { label: 'Monthly', freq: 'monthly' },
+    { label: 'One-time', freq: 'once' },
+  ];
+  let html = '';
+  groups.forEach(g => {
+    const group = tasks.filter(t => t.freq === g.freq);
+    if (group.length === 0) return;
+    html += `<div class="section-title" style="margin-bottom:10px">${g.label}</div>`;
+    html += group.map(t => taskCardHTML(t, false)).join('');
+    html += '<div style="height:8px"></div>';
+  });
+  list.innerHTML = html;
 }
 
 // ── RENDER STATS ──
